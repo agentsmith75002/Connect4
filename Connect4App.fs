@@ -2,6 +2,8 @@ namespace Connect4
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
+open System
+open Microsoft.Xna.Framework.Input
 
 type Connect4App(nbRows:int, nbColumns: int) as this =
     inherit Game()
@@ -15,7 +17,7 @@ type Connect4App(nbRows:int, nbColumns: int) as this =
     let mutable circle = Unchecked.defaultof<Texture2D>
     let mutable graphicManager: GraphicsDeviceManager = new GraphicsDeviceManager(this)
     let mutable spriteBatch: SpriteBatch = Unchecked.defaultof<SpriteBatch>
-    // let mutable pixel = Unchecked.defaultof<Texture2D>
+    let mutable prevMouseState = Mouse.GetState()
     
     let createCircle radius color =
         let diameter = radius * 2
@@ -49,6 +51,7 @@ type Connect4App(nbRows:int, nbColumns: int) as this =
             this.IsMouseVisible <- true
             // this.IsFixedTimeStep <- true
             this.Window.Title <- "Connect 4"
+            this.Window.AllowAltF4 <- true
             base.Initialize()
 
         override this.LoadContent() =
@@ -61,8 +64,6 @@ type Connect4App(nbRows:int, nbColumns: int) as this =
 
             square <- createSquare SQUARE_SIZE Color.Blue
             circle <- createCircle (SQUARE_SIZE/2-OFFSET) Color.White
-            // pixel <- new Texture2D(this.GraphicsDevice, 1, 1)
-            // pixel.SetData([|Color.White|])
 
         override this.Draw(gameTime: GameTime) =
             this.GraphicsDevice.Clear(Color.Black)
@@ -78,3 +79,19 @@ type Connect4App(nbRows:int, nbColumns: int) as this =
             spriteBatch.End()
             
             base.Draw(gameTime)
+
+        override this.Update(gameTime: GameTime) =
+            let mouseState = Mouse.GetState()
+
+            if mouseState.LeftButton = ButtonState.Pressed && prevMouseState.LeftButton = ButtonState.Released then
+                let mouseX = mouseState.X
+                let mouseY = mouseState.Y
+                printfn "Mouse down at (%d, %d)" mouseX mouseY
+
+            prevMouseState <- mouseState
+
+            base.Update(gameTime)
+            
+        override this.OnExiting(sender: obj, args: EventArgs) =
+            base.OnExiting(sender, args)
+            this.Exit()
